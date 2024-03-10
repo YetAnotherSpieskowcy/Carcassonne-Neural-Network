@@ -17,6 +17,12 @@ jobs:
           # Full git history is needed to get a proper
           # list of changed files within `super-linter`
           fetch-depth: 0
+      - run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+      
+      - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
       - name: Mega-Linter
         uses: oxsecurity/megalinter@v7
         env:
