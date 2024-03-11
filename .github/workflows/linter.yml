@@ -1,0 +1,29 @@
+name: Pyright
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: main
+jobs:
+  build:
+    name: Pyright
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          # Full git history is needed to get a proper
+          # list of changed files within `super-linter`
+          fetch-depth: 0
+      - name: Preparing the environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+      
+      - run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
+      
+      - name: Pyright
+        uses: jakebailey/pyright-action@v2

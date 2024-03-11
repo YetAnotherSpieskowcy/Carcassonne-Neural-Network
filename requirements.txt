@@ -1,0 +1,4 @@
+coverage==7.4.3
+pandas==2.2.1
+pytest==8.1.1
+torch==2.2.1
