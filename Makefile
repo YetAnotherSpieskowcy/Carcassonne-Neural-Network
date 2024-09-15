@@ -10,10 +10,7 @@ build:
 	--no-index --find-links=$(ENGINE_PATH)/built_wheels \
 	--force-reinstall -U
 test: build .venv
-	.venv/bin/python -m pytest test/
-
-run: test
-	.venv/bin/python src/game.py
+	.venv/bin/python -m pytest test/ -s
 clean:
 	-rm -r .venv
 realclean: clean

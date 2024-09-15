@@ -7,7 +7,7 @@ pip install -r requirements.txt
 ```
 
 ```bash
-ENGINE_PATH="<Path to Carcassonne-Engine repository>" make run
+ENGINE_PATH="<Path to Carcassonne-Engine repository>" make test
 ```
 
 ## Running tests

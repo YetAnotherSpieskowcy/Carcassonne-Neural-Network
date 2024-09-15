@@ -1,11 +1,12 @@
 import math
-import random
 
 from carcassonne_engine.models import SerializedGameWithID
 from carcassonne_engine.requests import MoveWithState
 
-from dispatch import GameDispatch
-from tokens import CancelationToken
+from .agents import Agent
+from .dispatch import GameDispatch
+from .tokens import CancelationToken
+from .utils import upper_confidence_bound
 
 DISCOUNT_FACTOR = 0.9
 EXPLORATION_WEIGHT = 0.01
@@ -13,18 +14,19 @@ EXPLORATION_WEIGHT = 0.01
 
 class Tree:
     def __init__(
-        self, initial_game: SerializedGameWithID, dispatch: GameDispatch
+        self, agent: Agent, initial_game: SerializedGameWithID, dispatch: GameDispatch
     ) -> None:
         self.initial_game = initial_game
         states = dispatch.gen_initial_states(
             initial_game.id, initial_game.game.current_tile
         )
         prob = [1.0 for _ in states]
-        self.root = Node(dispatch)
+        self.root = Node(dispatch, self)
 
         self.root.state = initial_game
         self.root.states = states
         self.root.probabilities = prob
+        self.agent: Agent = agent
 
     def populate(self, token: CancelationToken) -> None:
         while token():
@@ -35,13 +37,14 @@ class Tree:
 
 
 class Node:
-    def __init__(self, dispatch: GameDispatch) -> None:
+    def __init__(self, dispatch: GameDispatch, tree: Tree) -> None:
         self.is_expanded: bool = False
         self.q: float = 0
         self.selection_count: int = 1
         self.dispatch: GameDispatch = dispatch
         self.children: list[Node] = []
         self.state: SerializedGameWithID | None = None
+        self.tree: Tree = tree
 
     def __del__(self):
         if self.state is not None:
@@ -60,10 +63,10 @@ class Node:
         if not self.is_expanded:
             for action in self.states:
                 # Simulate remaining game states
-                n = Node(self.dispatch)
+                n = Node(self.dispatch, self.tree)
                 assert self.state is not None
                 n.expand(self.state, action)
-                n.q = rollout(n)
+                n.q = self.tree.agent.rollout(n)
                 cum_q += n.q
                 self.children.append(n)
             self.is_expanded = True
@@ -72,7 +75,13 @@ class Node:
             return 0
         # Select most promising action according to policy
         selected_pair: tuple[float, Node] = max(
-            zip(self.probabilities, self.children), key=lambda it: policy(it, cum_q)
+            zip(self.probabilities, self.children),
+            key=lambda it: upper_confidence_bound(
+                self.tree.agent.policy(it[0], it[1].state, cum_q),
+                it[1].selection_count,
+                cum_q,
+                EXPLORATION_WEIGHT,
+            ),
         )
         selected = selected_pair[1]
         selected.selection_count += 1
@@ -80,29 +89,3 @@ class Node:
         cum_q += selected.select(depth + 1)
         self.q += cum_q
         return cum_q * math.pow(DISCOUNT_FACTOR, depth) * selected_pair[0]
-
-
-def upper_confidence_bound(pi: float, n: int, q: float) -> float:
-    return pi + EXPLORATION_WEIGHT * math.sqrt(math.log(1 + q) / n)
-
-
-def policy(action: tuple[float, Node], q: float) -> float:
-    """
-    Policy evaluation function.
-    Currently action is assigned random value until
-    YetAnotherSpieskowcy/Carcassonne-Neural-Network/Policy network#4
-    is finished.
-    """
-    rng = random.Random()
-    return upper_confidence_bound(rng.random(), action[1].selection_count, q)
-
-
-def rollout(action: Node) -> float:
-    """
-    Simulates outcome of specific state
-    Currently action is assigned random value until
-    YetAnotherSpieskowcy/Carcassonne-Neural-Network/Value network#3
-    is finished.
-    """
-    rng = random.Random()
-    return rng.random() + 1
