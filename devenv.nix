@@ -13,6 +13,7 @@
       package = pkgs.go_1_22;
     };
   };
+  env.ENGINE_PATH = "../Carcassonne-Engine/";
   scripts.style.exec = ''
     ${pkgs.ruff}/bin/ruff check src test
     ${pkgs.ruff}/bin/ruff format src test

@@ -1,4 +1,4 @@
-ENGINE_PATH ?= "Carcassonne-Engine/"
+ENGINE_PATH ?= "../Carcassonne-Engine"
 build:
 	$(MAKE) -C $(ENGINE_PATH) build-python
 

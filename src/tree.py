@@ -63,12 +63,12 @@ class Node:
         if not self.is_expanded:
             for action in self.states:
                 # Simulate remaining game states
-                n = Node(self.dispatch, self.tree)
+                child = Node(self.dispatch, self.tree)
                 assert self.state is not None
-                n.expand(self.state, action)
-                n.q = self.tree.agent.rollout(n)
-                cum_q += n.q
-                self.children.append(n)
+                child.expand(self.state, action)
+                child.q = self.tree.agent.rollout(child)
+                cum_q += child.q
+                self.children.append(child)
             self.is_expanded = True
         if len(self.children) == 0:
             # Game has ended return score based on the outcome

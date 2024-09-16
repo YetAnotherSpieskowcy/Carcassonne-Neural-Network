@@ -16,9 +16,7 @@ class GameDispatch:
         self.engine = engine
 
     def destroy(self, game: SerializedGameWithID) -> None:
-        # TODO fix after YetAnotherSpieskowcy/Carcassonne-Engine/pull/94 is merged
-        # self.engine.delete_games([game.id])
-        ...
+        self.engine.delete_games([game.id])
 
     def simulate_move(
         self, game: SerializedGameWithID, move: MoveWithState
@@ -49,19 +47,19 @@ class GameDispatch:
         )
         assert_no_exception(resp)
         assert resp.tile_probabilities is not None
-        r = []
+        move_requests = []
         ps = []
         for tile in resp.tile_probabilities:
             ps.append(tile.probability)
-            r.append(GetLegalMovesRequest(base_game_id=game, tile_to_place=tile.tile))
-        rr = self.engine.send_get_legal_moves_batch(r)
+            move_requests.append(GetLegalMovesRequest(base_game_id=game, tile_to_place=tile.tile))
+        legal_moves = self.engine.send_get_legal_moves_batch(move_requests)
         states = []
         probs: list[float] = []
         i = 0
-        for re in rr:
-            assert_no_exception(re)
-            assert re.moves is not None
-            moves: list[MoveWithState] = re.moves
+        for move_response in legal_moves:
+            assert_no_exception(move_response)
+            assert move_response.moves is not None
+            moves: list[MoveWithState] = move_response.moves
             for move in moves:
                 probs.append(ps[i])
                 states.append(move)
