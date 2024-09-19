@@ -6,7 +6,7 @@ class CancelationToken:
         return True
 
 
-class ItertionLimit(CancelationToken):
+class IterationLimit(CancelationToken):
     def __call__(self, *args, **kwds) -> bool:
         self.iterations -= 1
         return self.iterations > 0

@@ -9,9 +9,7 @@ class RandomAgent(Agent):
     def policy(self, prob: float, action: SerializedGameWithID, q: float) -> float:
         """
         Policy evaluation function.
-        Currently action is assigned random value until
-        YetAnotherSpieskowcy/Carcassonne-Neural-Network/Policy network#4
-        is finished.
+        Action is assigned random value.
         """
         rng = random.Random()
         return rng.random()
@@ -19,9 +17,7 @@ class RandomAgent(Agent):
     def rollout(self, action: SerializedGameWithID) -> float:
         """
         Simulates outcome of specific state
-        Currently action is assigned random value until
-        YetAnotherSpieskowcy/Carcassonne-Neural-Network/Value network#3
-        is finished.
+        Action is assigned random value.
         """
         rng = random.Random()
         return rng.random() + 1

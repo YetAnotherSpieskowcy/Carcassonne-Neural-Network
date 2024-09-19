@@ -32,18 +32,18 @@ class GameDispatch:
         assert resp.game is not None
         return SerializedGameWithID(resp.game_id, resp.game)
 
-    def gen_initial_states(self, game: int, tile: Tile) -> list[MoveWithState]:
+    def gen_initial_states(self, game_id: int, tile: Tile) -> list[MoveWithState]:
         assert tile is not None
         (resp,) = self.engine.send_get_legal_moves_batch(
-            [GetLegalMovesRequest(base_game_id=game, tile_to_place=tile)]
+            [GetLegalMovesRequest(base_game_id=game_id, tile_to_place=tile)]
         )
         assert_no_exception(resp)
         assert resp.moves is not None
         return resp.moves
 
-    def gen_states(self, game: int) -> tuple[list[MoveWithState], list[float]]:
+    def gen_states(self, game_id: int) -> tuple[list[MoveWithState], list[float]]:
         (resp,) = self.engine.send_get_remaining_tiles_batch(
-            [GetRemainingTilesRequest(base_game_id=game)]
+            [GetRemainingTilesRequest(base_game_id=game_id)]
         )
         assert_no_exception(resp)
         assert resp.tile_probabilities is not None
@@ -51,7 +51,9 @@ class GameDispatch:
         ps = []
         for tile in resp.tile_probabilities:
             ps.append(tile.probability)
-            move_requests.append(GetLegalMovesRequest(base_game_id=game, tile_to_place=tile.tile))
+            move_requests.append(
+                GetLegalMovesRequest(base_game_id=game_id, tile_to_place=tile.tile)
+            )
         legal_moves = self.engine.send_get_legal_moves_batch(move_requests)
         states = []
         probs: list[float] = []

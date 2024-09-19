@@ -14,7 +14,7 @@ class Game:
         self.engine: GameEngine = engine
         self.tileset: TileSet = tileset
 
-    def run(self, *agents: list[Agent]):
+    def run(self, *agents: Agent):
         game: SerializedGameWithID = self.engine.generate_game(self.tileset)
         agent_ptr = 0
         while game.game.current_tile is not None:
