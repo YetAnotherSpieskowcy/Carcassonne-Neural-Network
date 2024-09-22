@@ -15,8 +15,8 @@ class GameDispatch:
     def __init__(self, engine: GameEngine) -> None:
         self.engine = engine
 
-    def destroy(self, game: SerializedGameWithID) -> None:
-        self.engine.delete_games([game.id])
+    #def destroy(self, game: SerializedGameWithID) -> None:
+    #    self.engine.delete_games([game.id])
 
     def sub_clone(self, game: SerializedGameWithID) -> SerializedGameWithID:
         cloned = SerializedGameWithID(

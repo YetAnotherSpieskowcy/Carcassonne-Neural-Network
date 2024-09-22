@@ -48,9 +48,9 @@ class Node:
         self.state: SerializedGameWithID | None = None
         self.tree: Tree = tree
 
-    def __del__(self):
-        if self.state is not None:
-            self.dispatch.destroy(self.state)
+    #def __del__(self):
+    #    if self.state is not None:
+    #        self.dispatch.destroy(self.state)
 
     def expand(self, state: SerializedGameWithID, action) -> None:
         self.action: MoveWithState = action
