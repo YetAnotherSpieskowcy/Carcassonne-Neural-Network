@@ -3,6 +3,8 @@ import math
 from carcassonne_engine.models import SerializedGameWithID
 from carcassonne_engine.requests import MoveWithState
 
+from tqdm import tqdm
+
 from .agents import Agent
 from .dispatch import GameDispatch
 from .tokens import CancelationToken
@@ -16,14 +18,14 @@ class Tree:
     def __init__(
         self, agent: Agent, initial_game: SerializedGameWithID, dispatch: GameDispatch
     ) -> None:
-        self.initial_game = initial_game
+        self.initial_game = dispatch.sub_clone(initial_game)
         states = dispatch.gen_initial_states(
-            initial_game.id, initial_game.game.current_tile
+            self.initial_game.id, self.initial_game.game.current_tile
         )
         prob = [1.0 for _ in states]
         self.root = Node(dispatch, self)
 
-        self.root.state = initial_game
+        self.root.state = self.initial_game
         self.root.states = states
         self.root.probabilities = prob
         self.agent: Agent = agent
@@ -59,9 +61,9 @@ class Node:
 
     def select(self, depth: int) -> float:
         # Expand every child node
-        cum_q: float = 0
         if not self.is_expanded:
-            for action in self.states:
+            cum_q: float = 0
+            for action in tqdm(self.states, desc=f"Expansion at depth {depth}"):
                 # Simulate remaining game states
                 child = Node(self.dispatch, self.tree)
                 assert self.state is not None
@@ -70,22 +72,23 @@ class Node:
                 cum_q += child.q
                 self.children.append(child)
             self.is_expanded = True
-        if len(self.children) == 0:
-            # Game has ended return score based on the outcome
-            return 0
-        # Select most promising action according to policy
-        selected_pair: tuple[float, Node] = max(
-            zip(self.probabilities, self.children),
-            key=lambda it: upper_confidence_bound(
-                self.tree.agent.policy(it[0], it[1].state, cum_q),
-                it[1].selection_count,
-                cum_q,
-                EXPLORATION_WEIGHT,
-            ),
-        )
-        selected = selected_pair[1]
-        selected.selection_count += 1
-        # Update q values of preceding nodes
-        cum_q += selected.select(depth + 1)
-        self.q += cum_q
-        return cum_q * math.pow(DISCOUNT_FACTOR, depth) * selected_pair[0]
+            return cum_q
+        else:
+            if len(self.children) == 0:
+                # Game has ended return score based on the outcome
+                return 0
+            # Select most promising action according to policy
+            selected_pair: tuple[float, Node] = max(
+                zip(self.probabilities, self.children),
+                key=lambda it: upper_confidence_bound(
+                    self.tree.agent.policy(it[0], it[1].state, self.q),
+                    it[1].selection_count,
+                    self.q,
+                    EXPLORATION_WEIGHT,
+                ),
+            )
+            selected = selected_pair[1]
+            selected.selection_count += 1
+            # Update q values of preceding nodes
+            self.q += selected.select(depth + 1)
+            return self.q * math.pow(DISCOUNT_FACTOR, depth) * selected_pair[0]
