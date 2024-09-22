@@ -2,9 +2,10 @@ import pytest
 from carcassonne_engine import GameEngine, TileSet, tiletemplates
 
 
-@pytest.fixture
-def engine(tmp_path):
-    with GameEngine(1, tmp_path) as engine:
+@pytest.fixture(scope="session")
+def engine(tmp_path_factory):
+    logs_path = tmp_path_factory.mktemp("logs")
+    with GameEngine(1, logs_path) as engine:
         yield engine
 
 
