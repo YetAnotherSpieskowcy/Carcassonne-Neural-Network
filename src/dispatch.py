@@ -18,6 +18,12 @@ class GameDispatch:
     def destroy(self, game: SerializedGameWithID) -> None:
         self.engine.delete_games([game.id])
 
+    def sub_clone(self, game: SerializedGameWithID) -> SerializedGameWithID:
+        cloned = SerializedGameWithID(
+            self.engine.sub_clone_game(game.id, 1)[0], game.game
+        )
+        return cloned
+
     def simulate_move(
         self, game: SerializedGameWithID, move: MoveWithState
     ) -> SerializedGame:
