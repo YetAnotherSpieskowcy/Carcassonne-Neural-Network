@@ -68,7 +68,8 @@ class Node:
                 child = Node(self.dispatch, self.tree)
                 assert self.state is not None
                 child.expand(self.state, action)
-                child.q = self.tree.agent.rollout(child.state)
+                scores = self.dispatch.get_mid_scores(child.state)
+                child.q = self.tree.agent.rollout(child.state, scores)
                 cum_q += child.q
                 self.children.append(child)
             self.is_expanded = True

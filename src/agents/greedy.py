@@ -15,9 +15,9 @@ class GreedyAgent(Agent):
         """
         return float(action.game.players[self.ID].score)
 
-    def rollout(self, action: SerializedGameWithID) -> float:
+    def rollout(self, action: SerializedGameWithID, mid_scores: dict[int, int]) -> float:
         """
         Simulates outcome of specific state
         Action is assigned it's point value.
         """
-        return float(action.game.players[self.ID].score)
+        return float(mid_scores[self.ID+1])

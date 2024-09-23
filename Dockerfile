@@ -10,14 +10,14 @@ ENV PATH="$PATH:$GOPATH/bin"
 
 VOLUME /logs
 
+WORKDIR /workspace/app/Carcassonne-Neural-Network
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
 ARG ENGINE_BRANCH=main
 WORKDIR /workspace/app
 RUN git clone -b $ENGINE_BRANCH --single-branch https://github.com/YetAnotherSpieskowcy/Carcassonne-Engine.git
 
-WORKDIR /workspace/app/Carcassonne-Engine
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
-
 WORKDIR /workspace/app/Carcassonne-Neural-Network
 COPY . .
-RUN pip install -r requirements.txt
 RUN ENGINE_PATH="../Carcassonne-Engine" make test

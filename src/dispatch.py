@@ -2,6 +2,7 @@ from carcassonne_engine import GameEngine, SerializedGame
 from carcassonne_engine.models import SerializedGameWithID
 from carcassonne_engine.requests import (
     GetLegalMovesRequest,
+    GetMidGameScoreRequest,
     GetRemainingTilesRequest,
     MoveWithState,
     PlayTurnRequest,
@@ -73,3 +74,11 @@ class GameDispatch:
                 states.append(move)
             i += 1
         return (states, probs)
+    
+    def get_mid_scores(self, game: SerializedGameWithID) -> dict[int, int]:
+        (resp,) = self.engine.send_get_mid_game_score_batch(
+            [GetMidGameScoreRequest(base_game_id=game.id)]
+        )
+        assert_no_exception(resp)
+        assert resp.player_scores is not None
+        return resp.player_scores
