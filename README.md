@@ -30,3 +30,19 @@ git clone https://github.com/YetAnotherSpieskowcy/Carcassonne-Engine.git
 ```bash
 ENGINE_PATH="<Path to Carcassonne-Engine repository>" make test
 ```
+
+## Running docker image
+
+### Based on engine main branch
+
+```bash
+docker build -t <IMAGE_NAME> .
+docker run --rm -it --entrypoint bash <IMAGE_NAME>
+```
+
+### Based on specific engine branch
+
+```bash
+docker build --build-arg ENGINE_BRANCH=<BRANCH_NAME> -t <IMAGE_NAME> .
+docker run --rm -it --entrypoint bash <IMAGE_NAME>
+```
