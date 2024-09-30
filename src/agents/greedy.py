@@ -13,11 +13,11 @@ class GreedyAgent(Agent):
         Policy evaluation function.
         Action is assigned its point value.
         """
-        return float(action.game.players[self.ID].score)
+        return float(action.game.players[self.id].score)
 
     def rollout(self, action: SerializedGameWithID, mid_scores: dict[int, int]) -> float:
         """
         Simulates outcome of specific state
         Action is assigned its point value.
         """
-        return float(mid_scores[self.ID+1])
+        return float(mid_scores[self.id+1])
