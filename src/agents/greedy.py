@@ -6,18 +6,18 @@ from . import Agent
 class GreedyAgent(Agent):
     def __init__(self, id: int) -> None:
         super().__init__()
-        self.ID = id
+        self.id = id
 
     def policy(self, prob: float, action: SerializedGameWithID, q: float) -> float:
         """
         Policy evaluation function.
-        Action is assigned it's point value.
+        Action is assigned its point value.
         """
         return float(action.game.players[self.ID].score)
 
     def rollout(self, action: SerializedGameWithID, mid_scores: dict[int, int]) -> float:
         """
         Simulates outcome of specific state
-        Action is assigned it's point value.
+        Action is assigned its point value.
         """
         return float(mid_scores[self.ID+1])
