@@ -52,24 +52,28 @@ class Node:
         if self.state is not None:
             self.dispatch.destroy(self.state)
 
-    def expand(self, state: SerializedGameWithID, action) -> None:
+    def expand(self, action, future: tuple[list[MoveWithState], list[float]]) -> None:
         self.action: MoveWithState = action
-        self.state = self.dispatch.simulate_move(state, action)
-        states, probabilities = self.dispatch.gen_states(self.state.id)
-        self.states: list[MoveWithState] = states
-        self.probabilities: list[float] = probabilities
+        self.states: list[MoveWithState] = future[0]
+        self.probabilities: list[float] = future[1]
 
     def select(self, depth: int) -> float:
         # Expand every child node
         if not self.is_expanded:
             cum_q: float = 0
-            for action in tqdm(self.states, desc=f"Expansion at depth {depth}"):
+            states_reqs = []
+            for action in self.states:
+                req = self.dispatch.expand_node(self.state, action)
+                states_reqs.append((action, req))
+            for action in tqdm(states_reqs, desc=f"Expansion at depth {depth}"):
                 # Simulate remaining game states
                 child = Node(self.dispatch, self.tree)
                 assert self.state is not None
-                child.expand(self.state, action)
-                scores = self.dispatch.get_mid_scores(child.state)
-                child.q = self.tree.agent.rollout(child.state, scores)
+                state, req = action[1].result()
+                child.state = state
+                child.expand(action[0], req)
+                # scores = self.dispatch.get_mid_scores(child.state)
+                child.q = self.tree.agent.rollout(child.state, {0: 1, 1: 1, 2: 2})
                 cum_q += child.q
                 self.children.append(child)
             self.is_expanded = True

@@ -1,4 +1,4 @@
-from carcassonne_engine import GameEngine, SerializedGame
+from carcassonne_engine import GameEngine
 from carcassonne_engine.models import SerializedGameWithID
 from carcassonne_engine.requests import (
     GetLegalMovesRequest,
@@ -10,11 +10,13 @@ from carcassonne_engine.requests import (
 )
 
 from .utils import assert_no_exception
+from concurrent.futures import ThreadPoolExecutor, Future
 
 
 class GameDispatch:
     def __init__(self, engine: GameEngine) -> None:
         self.engine = engine
+        self.executor = ThreadPoolExecutor(1)
 
     def destroy(self, game: SerializedGameWithID) -> None:
         self.engine.delete_games([game.id])
@@ -25,9 +27,18 @@ class GameDispatch:
         )
         return cloned
 
+    def expand_node(
+        self, state: SerializedGameWithID, action: MoveWithState
+    ) -> Future[tuple[SerializedGameWithID, tuple[list[MoveWithState], list[float]]]]:
+        def task(in_state: SerializedGameWithID, action: MoveWithState):
+            state: SerializedGameWithID = self.simulate_move(in_state, action)
+            return (state, self.gen_states(state.id))
+
+        return self.executor.submit(task, state, action)
+
     def simulate_move(
         self, game: SerializedGameWithID, move: MoveWithState
-    ) -> SerializedGame:
+    ) -> SerializedGameWithID:
         """
         Perform a move on a cloned game and return the resulting game
         """
@@ -74,7 +85,7 @@ class GameDispatch:
                 states.append(move)
             i += 1
         return (states, probs)
-    
+
     def get_mid_scores(self, game: SerializedGameWithID) -> dict[int, int]:
         (resp,) = self.engine.send_get_mid_game_score_batch(
             [GetMidGameScoreRequest(base_game_id=game.id)]
