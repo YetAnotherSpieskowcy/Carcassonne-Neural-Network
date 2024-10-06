@@ -37,12 +37,12 @@ ENGINE_PATH="<Path to Carcassonne-Engine repository>" make test
 
 ```bash
 docker build -t <IMAGE_NAME> .
-docker run --rm -it --entrypoint bash <IMAGE_NAME>
+docker run --rm -v $(pwd):/workspace <IMAGE_NAME> <GAME_SCRIPT>
 ```
 
 ### Based on specific engine branch
 
 ```bash
 docker build --build-arg ENGINE_BRANCH=<BRANCH_NAME> -t <IMAGE_NAME> .
-docker run --rm -it --entrypoint bash <IMAGE_NAME>
+docker run --rm -v $(pwd):/workspace <IMAGE_NAME> <GAME_SCRIPT>
 ```
