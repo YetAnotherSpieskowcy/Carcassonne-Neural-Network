@@ -13,6 +13,6 @@ def test_greedy_agent_game(engine, small_tileset):
     Game(engine, small_tileset).run(GreedyAgent(0), GreedyAgent(1))
 
 
-@pytest.mark.skip()
+@pytest.mark.slow
 def test_greedy_agent_full_game(engine):
     Game(engine, standard_tile_set()).run(GreedyAgent(0), GreedyAgent(1))

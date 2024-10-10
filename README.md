@@ -31,6 +31,12 @@ git clone https://github.com/YetAnotherSpieskowcy/Carcassonne-Engine.git
 ENGINE_PATH="<Path to Carcassonne-Engine repository>" make test
 ```
 
+## Running the full game test
+
+```bash
+ENGINE_PATH="<Path to Carcassonne-Engine repository>" make test-slow
+```
+
 ## Running docker image
 
 ### Based on engine main branch
