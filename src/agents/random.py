@@ -14,10 +14,14 @@ class RandomAgent(Agent):
         rng = random.Random()
         return rng.random()
 
-    def rollout(self, action: SerializedGameWithID, mid_scores: dict[int, int]) -> float:
+    def rollout(
+        self, action: SerializedGameWithID, mid_scores: dict[int, int]
+    ) -> float:
         """
         Simulates outcome of specific state
         Action is assigned random value.
         """
         rng = random.Random()
         return rng.random() + 1
+
+    def reward(self, back: list): ...

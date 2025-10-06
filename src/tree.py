@@ -35,6 +35,7 @@ class Tree:
             self.root.select(0)
 
     def execute(self) -> MoveWithState:
+        self.agent.reward([back.state for back in self.root.children])
         return max(self.root.children, key=lambda it: it.q / it.selection_count).action
 
 
